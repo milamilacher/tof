@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>¡Desafío Mágico de Preguntas Por Categorías!</title>
+  <style>
+    :root {
+      --bg-color: #f0f8ff;
+      --card-bg: #ffffff;
+      --primary: #ff6b6b;
+      --secondary: #4ecdc4;
+      --accent: #ffe66d;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --purple: #a55eea;
+      --orange: #fa8231;
+      --text: #2c3e50;
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', cursive, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      background: linear-gradient(135deg, #a8edd9 0%, #fed6e3 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border: 4px solid #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      margin: 6px 0;
+      color: #ff4757;
+      text-shadow: 2px 2px 0px #ffe66d;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .option-group {
+      background: #f7f9fc;
+      padding: 12px 14px;
+      border-radius: 15px;
+      border: 2px dashed #cbd5e1;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 2px solid var(--secondary);
+      font-size: 1rem;
+      outline: none;
+      background: #fff;
+      font-weight: bold;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .category-card {
+      background: #e2e8f0;
+      border: 3px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      opacity: 0.65;
+    }
+
+    .category-card.selected {
+      border-color: #2ecc71;
+      background: #e8f8f5;
+      color: #1e8449;
+      box-shadow: 0 4px 0 #2ecc71;
+      transform: translateY(-2px);
+      opacity: 1;
+    }
+
+    .category-icon-status {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border: 3px solid #cbd5e1;
+      background: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    .mode-btn.selected {
+      border-color: #ff4757;
+      background: #ffeaa7;
+      transform: scale(1.02);
+    }
+
+    .btn-main {
+      background: linear-gradient(to bottom, #ff7675, #d63031);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #b2bec3;
+      transition: all 0.1s;
+      text-align: center;
+    }
+
+    .btn-main:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #b2bec3;
+    }
+
+    /* BOTÓN PARA CANCELAR/FINALIZAR PARTIDA */
+    .btn-exit {
+      background: #74b9ff;
+      color: #0c2461;
+      border: 2px solid #0984e3;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.1s;
+      align-self: flex-end;
+    }
+
+    .btn-exit:active {
+      transform: scale(0.96);
+    }
+
+    .turn-badge {
+      background: #74b9ff;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+      box-shadow: 0 4px 0 #0984e3;
+    }
+
+    .category-badge {
+      align-self: center;
+      background: #a55eea;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 15px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      box-shadow: 0 3px 0 #8854d0;
+    }
+
+    .timer-bar {
+      height: 14px;
+      background: #dfe6e9;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #b2bec3;
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: #2ecc71;
+      transition: width 1s linear, background-color 0.3s;
+    }
+
+    .question-box {
+      background: #fff9e6;
+      border: 3px solid #ffeaa7;
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      line-height: 1.4;
+    }
+
+    .ans-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-ans {
+      flex: 1;
+      padding: 18px 10px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    }
+
+    .btn-ans:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .btn-true { background: var(--green); }
+    .btn-false { background: var(--red); }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .score-card {
+      background: #f1f2f6;
+      padding: 8px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      border: 2px solid #ced6e0;
+    }
+
+    .score-card.active-p {
+      border-color: #ff4757;
+      background: #fff0f1;
+      font-weight: bold;
+    }
+
+    .score-card .pts {
+      font-size: 1.05rem;
+      color: #2e86de;
+      font-weight: bold;
+    }
+
+    .feedback-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.96);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      border-radius: var(--radius);
+      animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .feedback-icon { font-size: 4.5rem; margin-bottom: 8px; }
+    .feedback-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 4px; }
+    .feedback-points { font-size: 1.3rem; font-weight: bold; }
+    .hidden { display: none !important; }
+  </style>
+
+  <!-- CARGA DE LOS ARCHIVOS DE PREGUNTAS EXTERNOS -->
+  <script src="preguntas_matematicas.js"></script>
+  <script src="preguntas_animales.js"></script>
+  <script src="preguntas_cuerpo.js"></script>
+  <script src="preguntas_espacio.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- PANTALLA INICIAL / CONFIGURACIÓN -->
+  <div id="screen-setup" class="screen active">
+    <h1>🎮 Desafío Mágico</h1>
+
+    <div class="option-group">
+      <label>📂 Categorías Incluidas:</label>
+      <div class="categories-grid">
+        <div class="category-card selected" data-cat="matematicas" onclick="toggleCategory('matematicas')">
+          <span class="category-icon-status" id="status-matematicas">✔</span> ➕ Matemáticas
+        </div>
+        <div class="category-card selected" data-cat="reino_animal" onclick="toggleCategory('reino_animal')">
+          <span class="category-icon-status" id="status-reino_animal">✔</span> 🦁 Reino Animal
+        </div>
+        <div class="category-card selected" data-cat="cuerpo_humano" onclick="toggleCategory('cuerpo_humano')">
+          <span class="category-icon-status" id="status-cuerpo_humano">✔</span> 🦴 Cuerpo Humano
+        </div>
+        <div class="category-card selected" data-cat="espacio_exterior" onclick="toggleCategory('espacio_exterior')">
+          <span class="category-icon-status" id="status-espacio_exterior">✔</span> 🚀 Espacio Exterior
+        </div>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <label for="player-count">👥 Cantidad de Jugadores (1 a 6):</label>
+      <select id="player-count" onchange="generatePlayerInputs()">
+        <option value="1">1 Jugador</option>
+        <option value="2">2 Jugadores</option>
+        <option value="3">3 Jugadores</option>
+        <option value="4">4 Jugadores</option>
+        <option value="5">5 Jugadores</option>
+        <option value="6">6 Jugadores</option>
+      </select>
+      <div id="player-names-container" style="margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+
+    <div class="option-group">
+      <label for="total-questions">❓ Preguntas en el Desafío:</label>
+      <select id="total-questions">
+        <option value="5">5 Preguntas</option>
+        <option value="10">10 Preguntas</option>
+        <option value="15">15 Preguntas</option>
+        <option value="20" selected>20 Preguntas</option>
+        <option value="30">30 Preguntas</option>
+      </select>
+    </div>
+
+    <div class="option-group">
+      <label>🔊 Modalidad de Juego:</label>
+      <div class="mode-selector">
+        <div class="mode-btn selected" id="mode-mudo" onclick="setAudioMode(false)">
+          🙊 Mudo<br><small>(Solo Leer)</small>
+        </div>
+        <div class="mode-btn" id="mode-audio" onclick="setAudioMode(true)">
+          🔊 Con Audio<br><small>(Escuchar)</small>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-main" onclick="startGame()">¡COMENZAR JUEGO! 🚀</button>
+  </div>
+
+  <!-- PANTALLA DE JUEGO -->
+  <div id="screen-game" class="screen">
+    <!-- Botón de salida rápida -->
+    <button class="btn-exit" onclick="cancelGame()">✖ Finalizar Partida</button>
+
+    <div class="turn-badge" id="current-player-tag">Turno de: Jugador 1</div>
+
+    <div class="timer-bar">
+      <div class="timer-fill" id="timer-bar-fill"></div>
+    </div>
+    <div style="text-align:right; font-size:0.85rem; font-weight:bold; color:#7f8c8d;">
+      ⏱️ <span id="timer-text">50</span>s
+    </div>
+
+    <button id="btn-reveal" class="btn-main" onclick="revealQuestion()">👁️ Mostrar Pregunta</button>
+
+    <div id="game-play-area" class="hidden" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="category-badge" id="category-tag">Categoría</div>
+
+      <div class="question-box" id="question-text">
+        Cargando pregunta...
+      </div>
+
+      <div class="ans-buttons">
+        <button class="btn-ans btn-true" onclick="submitAnswer(true)">VERDADERO 👍</button>
+        <button class="btn-ans btn-false" onclick="submitAnswer(false)">FALSO 👎</button>
+      </div>
+    </div>
+
+    <h3>🏆 Puntajes</h3>
+    <div class="scoreboard" id="scoreboard"></div>
+  </div>
+
+  <!-- PANTALLA FINAL -->
+  <div id="screen-final" class="screen">
+    <h1>🎉 ¡Fin del Juego! 🎉</h1>
+    <div id="final-winner" style="text-align:center; font-size:1.3rem; font-weight:bold; margin:12px 0; color:#2e86de;"></div>
+    <div class="scoreboard" id="final-scoreboard"></div>
+    <button class="btn-main" style="margin-top:16px;" onclick="resetGame()">🔄 Jugar de Nuevo</button>
+  </div>
+
+  <!-- FEEDBACK OVERLAY -->
+  <div id="feedback-overlay" class="feedback-overlay">
+    <div class="feedback-icon" id="fb-icon">🎉</div>
+    <div class="feedback-title" id="fb-title">¡CORRECTO!</div>
+    <div class="feedback-points" id="fb-pts">+3 Puntos</div>
+  </div>
+
+</div>
+
+<script>
+  const categoriesInfo = {
+    matematicas: { name: "Matemáticas", icon: "➕" },
+    reino_animal: { name: "Reino Animal", icon: "🦁" },
+    cuerpo_humano: { name: "Cuerpo Humano", icon: "🦴" },
+    espacio_exterior: { name: "Espacio Exterior", icon: "🚀" }
+  };
+
+  let selectedCategories = {
+    matematicas: true,
+    reino_animal: true,
+    cuerpo_humano: true,
+    espacio_exterior: true
+  };
+
+  function toggleCategory(catKey) {
+    const activeCount = Object.values(selectedCategories).filter(Boolean).length;
+    if (selectedCategories[catKey] && activeCount <= 1) {
+      alert("¡Debes seleccionar al menos una categoría para jugar!");
+      return;
+    }
+
+    selectedCategories[catKey] = !selectedCategories[catKey];
+    const isSelected = selectedCategories[catKey];
+    
+    const card = document.querySelector(`.category-card[data-cat="${catKey}"]`);
+    const statusIcon = document.getElementById(`status-${catKey}`);
+
+    if (card && statusIcon) {
+      card.classList.toggle('selected', isSelected);
+      statusIcon.innerText = isSelected ? "✔" : "❌";
+    }
+  }
+
+  let players = [];
+  let currentPlayerIdx = 0;
+  let totalQuestionsToPlay = 20;
+  let questionsPlayed = 0;
+  let audioEnabled = false;
+  let timerInterval = null;
+  let timeLeft = 50;
+  let currentQuestion = null;
+  let gameQuestions = [];
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playSound(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'correct') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'wrong') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    }
+  }
+
+  function speakText(text) {
+    if (!audioEnabled || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.92;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function generatePlayerInputs() {
+    const count = parseInt(document.getElementById('player-count').value);
+    const container = document.getElementById('player-names-container');
+    container.innerHTML = '';
+    for (let i = 1; i <= count; i++) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = `Nombre Jugador ${i}`;
+      input.value = `Jugador ${i}`;
+      input.id = `player-name-${i}`;
+      container.appendChild(input);
+    }
+  }
+  generatePlayerInputs();
+
+  function setAudioMode(enable) {
+    audioEnabled = enable;
+    document.getElementById('mode-mudo').classList.toggle('selected', !enable);
+    document.getElementById('mode-audio').classList.toggle('selected', enable);
+  }
+
+  function startGame() {
+    const activeCats = Object.keys(selectedCategories).filter(k => selectedCategories[k]);
+    if (activeCats.length === 0) {
+      alert("¡Debes seleccionar al menos una categoría!");
+      return;
+    }
+
+    const count = parseInt(document.getElementById('player-count').value);
+    players = [];
+    for (let i = 1; i <= count; i++) {
+      const name = document.getElementById(`player-name-${i}`).value.trim() || `Jugador ${i}`;
+      players.push({ name, score: 0 });
+    }
+
+    totalQuestionsToPlay = parseInt(document.getElementById('total-questions').value);
+    questionsPlayed = 0;
+    currentPlayerIdx = 0;
+
+    let combinedQuestions = [];
+    activeCats.forEach(catKey => {
+      let list = [];
+      if (catKey === 'matematicas' && typeof preguntasMatematicas !== 'undefined') list = preguntasMatematicas;
+      if (catKey === 'reino_animal' && typeof preguntasAnimales !== 'undefined') list = preguntasAnimales;
+      if (catKey === 'cuerpo_humano' && typeof preguntasCuerpo !== 'undefined') list = preguntasCuerpo;
+      if (catKey === 'espacio_exterior' && typeof preguntasEspacio !== 'undefined') list = preguntasEspacio;
+
+      list.forEach(q => combinedQuestions.push({ ...q, catKey }));
+    });
+
+    gameQuestions = combinedQuestions.sort(() => Math.random() - 0.5);
+
+    showScreen('screen-game');
+    updateScoreboard();
+    prepareTurn();
+  }
+
+  function prepareTurn() {
+    clearInterval(timerInterval);
+    document.getElementById('current-player-tag').innerText = `Turno de: ${players[currentPlayerIdx].name}`;
+    document.getElementById('btn-reveal').classList.remove('hidden');
+    document.getElementById('game-play-area').classList.add('hidden');
+    
+    document.getElementById('timer-text').innerText = '50';
+    document.getElementById('timer-bar-fill').style.width = '100%';
+    document.getElementById('timer-bar-fill').style.backgroundColor = '#2ecc71';
+
+    updateScoreboard();
+  }
+
+  function revealQuestion() {
+    document.getElementById('btn-reveal').classList.add('hidden');
+    document.getElementById('game-play-area').classList.remove('hidden');
+
+    currentQuestion = gameQuestions[questionsPlayed % gameQuestions.length];
+    
+    const catData = categoriesInfo[currentQuestion.catKey] || { name: "General", icon: "❓" };
+    document.getElementById('category-tag').innerText = `${catData.icon} Categoría: ${catData.name}`;
+    document.getElementById('question-text').innerText = currentQuestion.q;
+
+    if (audioEnabled) {
+      speakText(`Categoría ${catData.name}. ${currentQuestion.q}`);
+    }
+
+    startTimer();
+  }
+
+  function startTimer() {
+    timeLeft = 50;
+    const fill = document.getElementById('timer-bar-fill');
+    
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('timer-text').innerText = timeLeft;
+      const pct = (timeLeft / 50) * 100;
+      fill.style.width = `${pct}%`;
+
+      if (timeLeft <= 15) fill.style.backgroundColor = '#e74c3c';
+      else if (timeLeft <= 30) fill.style.backgroundColor = '#f1c40f';
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function handleTimeout() {
+    showFeedback(false, -2, "⏰ ¡TIEMPO AGOTADO!");
+  }
+
+  function submitAnswer(userAns) {
+    clearInterval(timerInterval);
+    window.speechSynthesis.cancel();
+
+    const isCorrect = (userAns === currentQuestion.a);
+    if (isCorrect) {
+      players[currentPlayerIdx].score += 3;
+      showFeedback(true, 3, "¡CORRECTO! 🎉");
+    } else {
+      players[currentPlayerIdx].score -= 2;
+      showFeedback(false, -2, "¡INCORRECTO! ❌");
+    }
+  }
+
+  function showFeedback(isCorrect, ptsDelta, title) {
+    playSound(isCorrect ? 'correct' : 'wrong');
+
+    const overlay = document.getElementById('feedback-overlay');
+    const icon = document.getElementById('fb-icon');
+    const titleEl = document.getElementById('fb-title');
+    const ptsEl = document.getElementById('fb-pts');
+
+    icon.innerText = isCorrect ? "🌟" : "💥";
+    titleEl.innerText = title;
+    titleEl.style.color = isCorrect ? "#2ecc71" : "#e74c3c";
+    ptsEl.innerText = (ptsDelta > 0 ? `+${ptsDelta}` : ptsDelta) + " Puntos";
+
+    overlay.style.display = 'flex';
+
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      nextTurn();
+    }, 1800);
+  }
+
+  function nextTurn() {
+    questionsPlayed++;
+    if (questionsPlayed >= totalQuestionsToPlay) {
+      endGame();
+    } else {
+      currentPlayerIdx = (currentPlayerIdx + 1) % players.length;
+      prepareTurn();
+    }
+  }
+
+  function updateScoreboard() {
+    const sb = document.getElementById('scoreboard');
+    sb.innerHTML = '';
+    players.forEach((p, idx) => {
+      const card = document.createElement('div');
+      card.className = `score-card ${idx === currentPlayerIdx ? 'active-p' : ''}`;
+      card.innerHTML = `<div>${p.name}</div><div class="pts">${p.score} pts</div>`;
+      sb.appendChild(card);
+    });
+  }
+
+  function endGame() {
+    showScreen('screen-final');
+    const sorted = [...players].sort((a,b) => b.score - a.score);
+    const winner = sorted[0];
+
+    document.getElementById('final-winner').innerText = 
+      `🏆 ¡Ganador/a: ${winner.name} con ${winner.score} puntos! 🏆`;
+
+    const finalSb = document.getElementById('final-scoreboard');
+    finalSb.innerHTML = '';
+    sorted.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'score-card';
+      card.style.fontSize = '1.1rem';
+      card.innerHTML = `<div>#${i+1} ${p.name}</div><div class="pts">${p.score} pts</div>`;
+      finalSb.appendChild(card);
+    });
+  }
+
+  function cancelGame() {
+    if (confirm("¿Seguro que deseas finalizar la partida actual y volver al inicio?")) {
+      clearInterval(timerInterval);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      showScreen('screen-setup');
+    }
+  }
+
+  function resetGame() {
+    showScreen('screen-setup');
+  }
+
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
+</script>
+</body>
+</html>
