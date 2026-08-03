@@ -177,7 +177,6 @@
       box-shadow: 0 2px 0 #b2bec3;
     }
 
-    /* BOTÓN PARA CANCELAR/FINALIZAR PARTIDA */
     .btn-exit {
       background: #74b9ff;
       color: #0c2461;
@@ -324,7 +323,6 @@
     .hidden { display: none !important; }
   </style>
 
-  <!-- CARGA DE LOS ARCHIVOS DE PREGUNTAS EXTERNOS -->
   <script src="preguntas_matematicas.js"></script>
   <script src="preguntas_animales.js"></script>
   <script src="preguntas_cuerpo.js"></script>
@@ -383,12 +381,23 @@
     <div class="option-group">
       <label>🔊 Modalidad de Juego:</label>
       <div class="mode-selector">
-        <div class="mode-btn selected" id="mode-mudo" onclick="setAudioMode(false)">
-          🙊 Mudo<br><small>(Solo Leer)</small>
-        </div>
-        <div class="mode-btn" id="mode-audio" onclick="setAudioMode(true)">
+        <div class="mode-btn selected" id="mode-audio" onclick="setAudioMode(false)">
           🔊 Con Audio<br><small>(Escuchar)</small>
         </div>
+        <div class="mode-btn" id="mode-mudo" onclick="setAudioMode(true)">
+          🙊 Mudo<br><small>(Solo Leer)</small>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE PERSONAJE REVISADO -->
+      <div id="voice-select-group" class="hidden" style="margin-top:12px;">
+        <label for="voice-style">🗣️ Personaje Narrador:</label>
+        <select id="voice-style">
+          <option value="persona">👤 Persona</option>
+          <option value="mickey">🐭 Mickey Mouse</option>
+          <option value="robot">🤖 Robot</option>
+          <option value="tortuga">🐢 Tortuga Sabia</option>
+        </select>
       </div>
     </div>
 
@@ -397,7 +406,6 @@
 
   <!-- PANTALLA DE JUEGO -->
   <div id="screen-game" class="screen">
-    <!-- Botón de salida rápida -->
     <button class="btn-exit" onclick="cancelGame()">✖ Finalizar Partida</button>
 
     <div class="turn-badge" id="current-player-tag">Turno de: Jugador 1</div>
@@ -483,7 +491,7 @@
   let currentPlayerIdx = 0;
   let totalQuestionsToPlay = 20;
   let questionsPlayed = 0;
-  let audioEnabled = false;
+  let audioEnabled = true;
   let timerInterval = null;
   let timeLeft = 50;
   let currentQuestion = null;
@@ -520,9 +528,34 @@
   function speakText(text) {
     if (!audioEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
+    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'es-ES';
-    utterance.rate = 0.92;
+
+    const selectedStyle = document.getElementById('voice-style').value;
+
+    switch (selectedStyle) {
+      case 'persona':
+        utterance.pitch = 1.15; // Toque agudo sutil
+        utterance.rate = 1.05;  // Toque ágil
+        break;
+      case 'mickey':
+        utterance.pitch = 1.9;  // Voz muy aguda estilo Mickey
+        utterance.rate = 0.85;  // Dinámico y alegre
+        break;
+      case 'robot':
+        utterance.pitch = 0.3;  // Voz grave, profunda y pausada
+        utterance.rate = 0.75;
+        break;
+      case 'tortuga':
+        utterance.pitch = 0.7;
+        utterance.rate = 0.6;
+        break;
+      default:
+        utterance.pitch = 1.0;
+        utterance.rate = 1.0;
+    }
+
     window.speechSynthesis.speak(utterance);
   }
 
@@ -545,6 +578,13 @@
     audioEnabled = enable;
     document.getElementById('mode-mudo').classList.toggle('selected', !enable);
     document.getElementById('mode-audio').classList.toggle('selected', enable);
+    
+    const voiceGroup = document.getElementById('voice-select-group');
+    if (enable) {
+      voiceGroup.classList.remove('hidden');
+    } else {
+      voiceGroup.classList.add('hidden');
+    }
   }
 
   function startGame() {
@@ -728,6 +768,8 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
   }
+  
+  setAudioMode(true);
 </script>
 </body>
 </html>
