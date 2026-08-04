@@ -1,4 +1,4 @@
-const preguntasCuerpo = [
+var preguntasCuerpo = [
   { q: "El corazón bombea sangre a todo nuestro cuerpo.", a: true },
   { q: "Los pulmones nos sirven para digerir los alimentos.", a: false },
   { q: "El estómago ayuda a procesar la comida que ingerimos.", a: true },
