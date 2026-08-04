@@ -1,4 +1,4 @@
-const preguntasEspacio = [
+var preguntasEspacio = [
   { q: "El Sol es una estrella muy brillante e inmensa.", a: true },
   { q: "La Tierra es el tercer planeta desde el Sol.", a: true },
   { q: "La Luna brilla porque produce su propia luz como un foco.", a: false },
