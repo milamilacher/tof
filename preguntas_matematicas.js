@@ -1,4 +1,4 @@
-const preguntasMatematicas = [
+var preguntasMatematicas = [
   { q: "Un triángulo tiene 3 lados.", a: true },
   { q: "Un cuadrado tiene 5 lados.", a: false },
   { q: "Un rectángulo tiene 4 lados.", a: true },
