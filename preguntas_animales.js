@@ -1,4 +1,4 @@
-const preguntasAnimales = [
+var preguntasAnimales = [
   { q: "Los perros pertenecen al grupo de los mamíferos.", a: true },
   { q: "Los gatos son carnívoros por naturaleza.", a: true },
   { q: "Los canguros llevan a sus crías en una bolsa en su panza.", a: true },
